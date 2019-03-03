@@ -11,115 +11,21 @@ import (
 	"os/exec"
 )
 
-/*
-@micromap|{
-	"config": {
-		"app":"NOT YOUR MOM"
-	},
-	"dep": {
-		"endpoint":"GET /api/v1/deliveries",
-		"service":"your mom v1",
-		"typ":"rest"
-	}
-}|
-@micromap|{
-	"dep": {
-		"endpoint":"GET /api/v2/deliveries",
-		"service":"your mom v2",
-		"typ":"rest"
-	}
-}|
-@micromap|{
-	"dep": {
-		"endpoint":"GET /api/v3/deliveries",
-		"service":"your mom v3",
-		"typ":"rest"
-	}
-}|
-@micromap|{
-	"dep": {
-		"endpoint":"GET /api/v4/deliveries",
-		"service":"your mom v4",
-		"typ":"rest"
-	}
-}|
-@micromap|{
-	"dep": {
-		"endpoint":"GET /api/v4/orders",
-		"service":"your mom v4",
-		"typ":"rest"
-	}
-}|
-@micromap|{
-	"dep": {
-		"endpoint":"GET /api/v4/orders",
-		"service":"your mom v5",
-		"typ":"rest"
-	}
-}|
-@micromap|{
-	"dep": {
-		"endpoint":"GET /api/v4/orders",
-		"service":"your mom v6",
-		"typ":"rest"
-	}
-}|
-@micromap|{
-	"dep": {
-		"endpoint":"GET /api/v4/orders",
-		"service":"your mom v7",
-		"typ":"rest"
-	}
-}|
-micromap|{
-	"dep": {
-		"endpoint":"GET /api/v4/orders",
-		"service":"your mom v8",
-		"typ":"rest"
-	}
-}|
-micromap|{
-	"dep": {
-		"endpoint":"GET /api/v4/orders",
-		"service":"your mom v9",
-		"typ":"rest"
-	}
-}|
-*/
-
-/*
-@micromap|{
-	"dep": {
-		"channel":"sync request",
-		"dir":"out",
-		"typ":"queue",
-		"service":"sns"
-	}
-}|
-*/
-
 func main() {
 	fs, err := files.FindFiles(os.Args[1])
 	if err != nil {
 		log.Fatal("Could not open files")
 	}
-	var cfgs []micromap.Configuration
-	var deps map[string][]micromap.Dependency
-	deps = make(map[string][]micromap.Dependency)
-	for _, file := range fs {
-		entries := micromap.IndexFile(file)
-		for _, entry := range entries {
-			cfgs = append(cfgs, entry.Config)
-			deps[entry.Dep.Service] = append(deps[entry.Dep.Service], entry.Dep)
-		}
-	}
 
-	var config micromap.Configuration
-	for _, cfg := range cfgs {
-		if cfg.App != "" {
-			config = cfg
-			break
+	var mmap micromap.Micromap
+	for _, file := range fs {
+		m := micromap.Map(file)
+		if m.Config.App != "" {
+			mmap.Config = m.Config
 		}
+		mmap.Groups = append(mmap.Groups, m.Groups...)
+		mmap.Deps = append(mmap.Deps, m.Deps...)
+		mmap.Rels = append(mmap.Rels, m.Rels...)
 	}
 
 	f, err := os.Create("micromap.dot")
@@ -128,21 +34,56 @@ func main() {
 	}
 	defer f.Close()
 
-	_, err = f.WriteString("graph {\n")
-	_, err = f.WriteString("\"" + config.App + "\"[fontcolor=white,style=filled,color=\"" + getColorHash() + "\"]\n")
-	for service, rels := range deps {
-		_, err = f.WriteString("\"" + service + "\"[fontcolor=white,style=filled,color=\"" + getColorHash() + "\"]\n")
-		for _, rel := range rels {
-			_, err = f.WriteString(edge(config.App, service, rel.Endpoint+rel.Channel, "1") + "\n")
+	var content string
+
+	content += "graph {\n"
+	content += "rankdir=LR\n"
+	content += node(mmap.Config.App, getColorHash(), "circle") + "\n"
+
+	grpDeps := make(map[string][]string)
+
+	for _, dep := range mmap.Deps {
+		content += node(dep.Name, getColorHash(), "box3d") + "\n"
+		if dep.Parent != "" {
+			grpDeps[dep.Parent] = append(grpDeps[dep.Parent], dep.Name)
 		}
 	}
-	_, err = f.WriteString("}\n")
+
+	for _, rel := range mmap.Rels {
+		content += edge(mmap.Config.App, rel.Service, rel.Dir+":"+rel.Path, "1") + "\n"
+	}
+
+	for i, grp := range mmap.Groups {
+		content += fmt.Sprintf("subgraph cluster_%d{\n", i)
+		content += "label=\"" + grp.Name + "\";\n"
+		for _, dep := range grpDeps[grp.Name] {
+			content += dep + ";"
+		}
+		content += "\n}\n"
+	}
+	content += "}\n"
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = f.WriteString(content)
+	if err != nil {
+		panic(err)
+	}
 
 	_, err = exec.Command("sh", "-c", "dot -Tpng micromap.dot -o micromap.png").Output()
+	if err != nil {
+		panic(err)
+	}
+
 }
 
-func edge(a, b, l, w string) string {
-	return fmt.Sprintf("\"%s\" -- \"%s\"[label=\"%s\",weight=\"%s\"];", a, b, l, w)
+func edge(a, b, label, weight string) string {
+	return fmt.Sprintf("\"%s\" -- \"%s\"[label=\"%s\",weight=\"%s\"];", a, b, label, weight)
+}
+
+func node(name, color, shape string) string {
+	return "\"" + name + "\"[shape=" + shape + ",fontcolor=white,style=filled,fillcolor=\"" + color + "\"]"
 }
 
 func getColorHash() string {

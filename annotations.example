@@ -1,0 +1,69 @@
+// CONFIG
+
+@micromap.config{
+	"app":"Cart"
+}
+
+// GROUPS
+
+@micromap.group{
+	"name":"SystemB"
+}
+@micromap.group{
+	"name":"SystemA",
+	"parent":"Legacy"
+}
+
+// DEPENDENCIES
+
+@micromap.dep{
+	"name":"Users",
+	"typ":"rest",
+	"parent":"SystemA"
+}
+@micromap.dep{
+	"name":"Orders",
+	"typ":"rest",
+	"parent":"SystemA"
+}
+@micromap.dep{
+	"name":"Products",
+	"typ":"rest",
+	"parent":"SystemB"
+}
+@micromap.dep{
+	"name":"SNS",
+	"typ":"queue"
+}
+@micromap.dep{
+	"name":"Postgres",
+	"typ":"db"
+}
+
+// RELATIONS
+
+@micromap.rel{
+	"path":"GET /api/v1/products",
+	"service":"Products",
+	"dir":"in"
+}
+@micromap.rel{
+	"path":"GET /api/v1/prices",
+	"service":"Products",
+	"dir":"in"
+}
+@micromap.rel{
+	"path":"GET /api/v2/users",
+	"service":"Users",
+	"dir":"in"
+}
+@micromap.rel{
+	"path":"GET /api/v1/orders",
+	"service":"Orders",
+	"dir":"in"
+}
+@micromap.rel{
+	"path":"MessageSyncInventory",
+	"service":"SNS",
+	"dir":"out"
+}
