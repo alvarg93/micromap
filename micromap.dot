@@ -1,16 +1,16 @@
 graph {
 rankdir=LR
 "Cart"[shape=circle,fontcolor=white,style=filled,fillcolor="#a2ae5e"]
-"Users"[shape=box3d,fontcolor=white,style=filled,fillcolor="#76a224"]
-"Orders"[shape=box3d,fontcolor=white,style=filled,fillcolor="#325070"]
-"Products"[shape=box3d,fontcolor=white,style=filled,fillcolor="#00bd17"]
+"Users"[shape=circle,fontcolor=white,style=filled,fillcolor="#76a224"]
+"Orders"[shape=circle,fontcolor=white,style=filled,fillcolor="#325070"]
+"Products"[shape=circle,fontcolor=white,style=filled,fillcolor="#00bd17"]
 "SNS"[shape=box3d,fontcolor=white,style=filled,fillcolor="#7db338"]
-"Postgres"[shape=box3d,fontcolor=white,style=filled,fillcolor="#95165b"]
-"Cart" -- "Products"[label="in:GET /api/v1/products",weight="1"];
-"Cart" -- "Products"[label="in:GET /api/v1/prices",weight="1"];
-"Cart" -- "Users"[label="in:GET /api/v2/users",weight="1"];
-"Cart" -- "Orders"[label="in:GET /api/v1/orders",weight="1"];
-"Cart" -- "SNS"[label="out:MessageSyncInventory",weight="1"];
+"Postgres"[shape=cylinder,fontcolor=white,style=filled,fillcolor="#95165b"]
+"Cart" -- "Products"[dir=forward,label="forward:GET /api/v1/products",weight="1"];
+"Cart" -- "Products"[dir=forward,label="forward:GET /api/v1/prices",weight="1"];
+"Cart" -- "Users"[dir=forward,label="forward:GET /api/v2/users",weight="1"];
+"Cart" -- "Orders"[dir=forward,label="forward:GET /api/v1/orders",weight="1"];
+"Cart" -- "SNS"[dir=both,label="both:MessageSyncInventory",weight="1"];
 subgraph cluster_0{
 label="SystemB";
 Products;

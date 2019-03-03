@@ -73,6 +73,9 @@ func Map(path string) Micromap {
 			content := find[skip+3:]
 			var rel Relation
 			err = json.Unmarshal(content, &rel)
+			if rel.Dir == "" {
+				rel.Dir = "none"
+			}
 			if err == nil {
 				rels = append(rels, rel)
 			}

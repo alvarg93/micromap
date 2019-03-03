@@ -45,25 +45,25 @@
 @micromap.rel{
 	"path":"GET /api/v1/products",
 	"service":"Products",
-	"dir":"in"
+	"dir":"forward"
 }
 @micromap.rel{
 	"path":"GET /api/v1/prices",
 	"service":"Products",
-	"dir":"in"
+	"dir":"forward"
 }
 @micromap.rel{
 	"path":"GET /api/v2/users",
 	"service":"Users",
-	"dir":"in"
+	"dir":"forward"
 }
 @micromap.rel{
 	"path":"GET /api/v1/orders",
 	"service":"Orders",
-	"dir":"in"
+	"dir":"forward"
 }
 @micromap.rel{
 	"path":"MessageSyncInventory",
 	"service":"SNS",
-	"dir":"out"
+	"dir":"both"
 }

@@ -38,19 +38,19 @@ func main() {
 
 	content += "graph {\n"
 	content += "rankdir=LR\n"
-	content += node(mmap.Config.App, getColorHash(), "circle") + "\n"
+	content += node(mmap.Config.App, getColorHash(), "app") + "\n"
 
 	grpDeps := make(map[string][]string)
 
 	for _, dep := range mmap.Deps {
-		content += node(dep.Name, getColorHash(), "box3d") + "\n"
+		content += node(dep.Name, getColorHash(), dep.Typ) + "\n"
 		if dep.Parent != "" {
 			grpDeps[dep.Parent] = append(grpDeps[dep.Parent], dep.Name)
 		}
 	}
 
 	for _, rel := range mmap.Rels {
-		content += edge(mmap.Config.App, rel.Service, rel.Dir+":"+rel.Path, "1") + "\n"
+		content += edge(mmap.Config.App, rel.Service, rel.Dir+":"+rel.Path, "1", rel.Dir) + "\n"
 	}
 
 	for i, grp := range mmap.Groups {
@@ -78,11 +78,18 @@ func main() {
 
 }
 
-func edge(a, b, label, weight string) string {
-	return fmt.Sprintf("\"%s\" -- \"%s\"[label=\"%s\",weight=\"%s\"];", a, b, label, weight)
+func edge(a, b, label, weight, dir string) string {
+	return fmt.Sprintf("\"%s\" -- \"%s\"[dir="+dir+",label=\"%s\",weight=\"%s\"];", a, b, label, weight)
 }
 
-func node(name, color, shape string) string {
+func node(name, color, typ string) string {
+	shape := "circle"
+	switch typ {
+	case "db":
+		shape = "cylinder"
+	case "queue":
+		shape = "box3d"
+	}
 	return "\"" + name + "\"[shape=" + shape + ",fontcolor=white,style=filled,fillcolor=\"" + color + "\"]"
 }
 
