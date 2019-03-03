@@ -1,0 +1,20 @@
+graph {
+"NOT YOUR MOM"[fontcolor=white,style=filled,color="#a2ae5e"]
+"your mom v6"[fontcolor=white,style=filled,color="#76a224"]
+"NOT YOUR MOM" -- "your mom v6"[label="GET /api/v4/orders",weight="1"];
+"your mom v7"[fontcolor=white,style=filled,color="#325070"]
+"NOT YOUR MOM" -- "your mom v7"[label="GET /api/v4/orders",weight="1"];
+"sns"[fontcolor=white,style=filled,color="#00bd17"]
+"NOT YOUR MOM" -- "sns"[label="sync request",weight="1"];
+"your mom v1"[fontcolor=white,style=filled,color="#7db338"]
+"NOT YOUR MOM" -- "your mom v1"[label="GET /api/v1/deliveries",weight="1"];
+"your mom v2"[fontcolor=white,style=filled,color="#95165b"]
+"NOT YOUR MOM" -- "your mom v2"[label="GET /api/v2/deliveries",weight="1"];
+"your mom v3"[fontcolor=white,style=filled,color="#4a0dbe"]
+"NOT YOUR MOM" -- "your mom v3"[label="GET /api/v3/deliveries",weight="1"];
+"your mom v4"[fontcolor=white,style=filled,color="#853974"]
+"NOT YOUR MOM" -- "your mom v4"[label="GET /api/v4/deliveries",weight="1"];
+"NOT YOUR MOM" -- "your mom v4"[label="GET /api/v4/orders",weight="1"];
+"your mom v5"[fontcolor=white,style=filled,color="#5e5eaf"]
+"NOT YOUR MOM" -- "your mom v5"[label="GET /api/v4/orders",weight="1"];
+}
