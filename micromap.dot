@@ -1,11 +1,11 @@
 graph {
 rankdir=LR
-"Cart"[shape=circle,fontcolor=white,style=filled,fillcolor="#9caa13"]
-"Users"[shape=circle,fontcolor=white,style=filled,fillcolor="#3a1339"]
-"Orders"[shape=circle,fontcolor=white,style=filled,fillcolor="#70b613"]
-"Products"[shape=circle,fontcolor=white,style=filled,fillcolor="#3097a1"]
-"SNS"[shape=box3d,fontcolor=white,style=filled,fillcolor="#c7669a"]
-"Postgres"[shape=cylinder,fontcolor=white,style=filled,fillcolor="#7d39c3"]
+"Cart"[shape=circle,fontcolor=white,style=filled,fillcolor="#4a6d5a"]
+"Users"[shape=circle,fontcolor=white,style=filled,fillcolor="#a66440"]
+"Orders"[shape=circle,fontcolor=white,style=filled,fillcolor="#2d8c9e"]
+"Products"[shape=circle,fontcolor=white,style=filled,fillcolor="#a55d3e"]
+"SNS"[shape=box3d,fontcolor=white,style=filled,fillcolor="#19c184"]
+"Postgres"[shape=cylinder,fontcolor=white,style=filled,fillcolor="#6f4c56"]
 "Cart" -- "Products"[dir=forward,label="forward:GET /api/v1/products",weight="1"];
 "Cart" -- "Products"[dir=forward,label="forward:GET /api/v1/prices",weight="1"];
 "Cart" -- "Users"[dir=forward,label="forward:GET /api/v2/users",weight="1"];
