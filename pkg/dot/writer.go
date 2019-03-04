@@ -9,6 +9,7 @@ import (
 	"os/exec"
 )
 
+//WriteToFile writes the contents of a Micromap into a file.
 func WriteToFile(f *os.File, mmap micromap.Micromap) error {
 	var content string
 
@@ -43,13 +44,14 @@ func WriteToFile(f *os.File, mmap micromap.Micromap) error {
 	return err
 }
 
+//ToPng runs the dot command to convert a dot file into an image file
 func ToPng(from, to, format string) error {
 	_, err := exec.Command("sh", "-c", "dot -T"+format+" "+from+" -o "+to).Output()
 	return err
 }
 
 func edge(a, b, label, weight, dir string) string {
-	return fmt.Sprintf("\"%s\" -- \"%s\"[dir="+dir+",label=\"%s\",weight=\"%s\"];", a, b, label, weight)
+	return fmt.Sprintf("\"%s\" -- \"%s\"[dir="+dir+",label=\"%s\"];", a, b, label)
 }
 
 func node(name, color, typ string) string {

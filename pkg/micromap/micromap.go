@@ -8,6 +8,7 @@ import (
 	"regexp"
 )
 
+//Micromap contains the result of parsing @micromap annotations
 type Micromap struct {
 	Config *Configuration
 	Groups []Group
@@ -15,25 +16,32 @@ type Micromap struct {
 	Rels   []Relation
 }
 
+//Configuration represents the @micromap.config annotation
 type Configuration struct {
 	App string
 }
 
+//Dependency represents the @micromap.dep annotation
 type Dependency struct {
 	Name   string
 	Typ    string
 	Parent string
 }
 
+//Relation represents the @micromap.rel annotation
 type Relation struct {
 	Service string
 	Path    string
 	Dir     string
 }
+
+//Group represents the @micromap.group annotation
 type Group struct {
 	Name string
 }
 
+//MapMany creates a Micromap containing values from
+//all provided filenames.
 func MapMany(filenames []string) Micromap {
 	var mmap Micromap
 	for _, file := range filenames {
@@ -48,6 +56,8 @@ func MapMany(filenames []string) Micromap {
 	return mmap
 }
 
+//Map creates a Micromap containing values from
+//the specified filename.
 func Map(filename string) Micromap {
 	file, err := ioutil.ReadFile(filename)
 	if err != nil {

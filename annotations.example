@@ -7,11 +7,10 @@
 // GROUPS
 
 @micromap.group{
-	"name":"SystemB"
+	"name":"SystemA"
 }
 @micromap.group{
-	"name":"SystemA",
-	"parent":"Legacy"
+	"name":"SystemB"
 }
 
 // DEPENDENCIES
