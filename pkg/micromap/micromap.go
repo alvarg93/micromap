@@ -2,7 +2,6 @@ package micromap
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"regexp"
@@ -69,7 +68,7 @@ func Map(filename string) Micromap {
 	var deps []Dependency
 	var rels []Relation
 
-	regex, err := regexp.Compile(`@micromap.(config|group|dep|rel){[^}]*}`)
+	regex := regexp.MustCompile(`@micromap.(config|group|dep|rel){[^}]*}`)
 
 	finds := regex.FindAll(file, -1)
 	for _, find := range finds {
@@ -77,24 +76,24 @@ func Map(filename string) Micromap {
 		var err error
 		switch string(find[skip:13]) {
 		case "con":
-			content := find[skip+6:]
+			content := trimInlineComments(find[skip+6:])
 			err = json.Unmarshal(content, &cfg)
 		case "gro":
-			content := find[skip+5:]
+			content := trimInlineComments(find[skip+5:])
 			var grp Group
 			err = json.Unmarshal(content, &grp)
 			if err == nil {
 				grps = append(grps, grp)
 			}
 		case "dep":
-			content := find[skip+3:]
+			content := trimInlineComments(find[skip+3:])
 			var dep Dependency
 			err = json.Unmarshal(content, &dep)
 			if err == nil {
 				deps = append(deps, dep)
 			}
 		case "rel":
-			content := find[skip+3:]
+			content := trimInlineComments(find[skip+3:])
 			var rel Relation
 			err = json.Unmarshal(content, &rel)
 			if rel.Dir == "" {
@@ -105,7 +104,7 @@ func Map(filename string) Micromap {
 			}
 		}
 		if err != nil {
-			fmt.Println("missed marker:", string(find))
+			log.Println("missed marker:", string(find))
 			log.Println(err)
 		}
 	}
@@ -115,4 +114,9 @@ func Map(filename string) Micromap {
 		Deps:   deps,
 		Rels:   rels,
 	}
+}
+
+func trimInlineComments(content []byte) []byte {
+	var re = regexp.MustCompile(`\s+(//|#)`)
+	return re.ReplaceAll(content, []byte{})
 }
