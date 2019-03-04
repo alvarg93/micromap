@@ -1,22 +1,24 @@
 package files
 
 import (
+	"github.com/alvarg93/micromap/pkg/opts"
 	"io/ioutil"
 	"log"
-	// "os"
 	"path/filepath"
 	"regexp"
 )
 
-func FindFiles(regex string) ([]string, error) {
-	files, err := findInDir(".", regex)
+//FindFiles scans the current directory for files matching
+//opts.Regex and continues recursively if opts.Recursive is true.
+func FindFiles(opts opts.Options) ([]string, error) {
+	files, err := findInDir(".", opts.Regex, opts.Recursive)
 	if err != nil {
 		return nil, err
 	}
 	return files, nil
 }
 
-func findInDir(path string, regex string) ([]string, error) {
+func findInDir(path string, regex string, recursive bool) ([]string, error) {
 	result := make([]string, 0)
 	dir, err := ioutil.ReadDir(path)
 	if err != nil {
@@ -31,9 +33,9 @@ func findInDir(path string, regex string) ([]string, error) {
 				log.Println("failed to create absolute path for", p, "/", f.Name())
 			}
 			result = append(result, abs)
-		} else if f.IsDir() {
+		} else if f.IsDir() && recursive {
 			p := filepath.Join(path, f.Name())
-			subdir, err := findInDir(p, regex)
+			subdir, err := findInDir(p, regex, recursive)
 			if err != nil {
 				log.Println("failed to read from")
 			}

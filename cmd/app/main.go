@@ -1,99 +1,43 @@
 package main
 
 import (
-	"encoding/hex"
-	"fmt"
+	"github.com/alvarg93/micromap/pkg/dot"
 	"github.com/alvarg93/micromap/pkg/files"
 	"github.com/alvarg93/micromap/pkg/micromap"
+	"github.com/alvarg93/micromap/pkg/opts"
 	"log"
 	"math/rand"
 	"os"
-	"os/exec"
+	"time"
 )
 
 func main() {
-	fs, err := files.FindFiles(os.Args[1])
+	opts, help := opts.ParseArgs(os.Args[1:])
+	if help {
+		os.Exit(0)
+	}
+
+	rand.Seed(time.Now().Unix())
+
+	fs, err := files.FindFiles(opts)
 	if err != nil {
-		log.Fatal("Could not open files")
+		log.Panic("could not open files", err)
 	}
 
-	var mmap micromap.Micromap
-	for _, file := range fs {
-		m := micromap.Map(file)
-		if m.Config.App != "" {
-			mmap.Config = m.Config
-		}
-		mmap.Groups = append(mmap.Groups, m.Groups...)
-		mmap.Deps = append(mmap.Deps, m.Deps...)
-		mmap.Rels = append(mmap.Rels, m.Rels...)
-	}
+	mmap := micromap.MapMany(fs)
 
-	f, err := os.Create("micromap.dot")
+	f, err := os.Create(opts.DotFile)
 	if err != nil {
 		panic(err)
 	}
 	defer f.Close()
 
-	var content string
-
-	content += "graph {\n"
-	content += "rankdir=LR\n"
-	content += node(mmap.Config.App, getColorHash(), "app") + "\n"
-
-	grpDeps := make(map[string][]string)
-
-	for _, dep := range mmap.Deps {
-		content += node(dep.Name, getColorHash(), dep.Typ) + "\n"
-		if dep.Parent != "" {
-			grpDeps[dep.Parent] = append(grpDeps[dep.Parent], dep.Name)
-		}
-	}
-
-	for _, rel := range mmap.Rels {
-		content += edge(mmap.Config.App, rel.Service, rel.Dir+":"+rel.Path, "1", rel.Dir) + "\n"
-	}
-
-	for i, grp := range mmap.Groups {
-		content += fmt.Sprintf("subgraph cluster_%d{\n", i)
-		content += "label=\"" + grp.Name + "\";\n"
-		for _, dep := range grpDeps[grp.Name] {
-			content += dep + ";"
-		}
-		content += "\n}\n"
-	}
-	content += "}\n"
+	err = dot.WriteToFile(f, mmap)
 	if err != nil {
-		panic(err)
+		log.Panic("failed to write dot file", err)
 	}
-
-	_, err = f.WriteString(content)
+	err = dot.ToPng(opts.DotFile, opts.ImgFile, opts.ImgFormat)
 	if err != nil {
-		panic(err)
+		log.Panic("failed to write img file", err)
 	}
-
-	_, err = exec.Command("sh", "-c", "dot -Tpng micromap.dot -o micromap.png").Output()
-	if err != nil {
-		panic(err)
-	}
-
-}
-
-func edge(a, b, label, weight, dir string) string {
-	return fmt.Sprintf("\"%s\" -- \"%s\"[dir="+dir+",label=\"%s\",weight=\"%s\"];", a, b, label, weight)
-}
-
-func node(name, color, typ string) string {
-	shape := "circle"
-	switch typ {
-	case "db":
-		shape = "cylinder"
-	case "queue":
-		shape = "box3d"
-	}
-	return "\"" + name + "\"[shape=" + shape + ",fontcolor=white,style=filled,fillcolor=\"" + color + "\"]"
-}
-
-func getColorHash() string {
-	r, g, b := uint8(rand.Uint32()%200), uint8(rand.Uint32()%200), uint8(rand.Uint32()%200)
-	return "#" + hex.EncodeToString([]byte{byte(r), byte(g), byte(b)})
 }

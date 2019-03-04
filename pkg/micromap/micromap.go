@@ -34,8 +34,22 @@ type Group struct {
 	Name string
 }
 
-func Map(path string) Micromap {
-	file, err := ioutil.ReadFile(path)
+func MapMany(filenames []string) Micromap {
+	var mmap Micromap
+	for _, file := range filenames {
+		m := Map(file)
+		if m.Config.App != "" {
+			mmap.Config = m.Config
+		}
+		mmap.Groups = append(mmap.Groups, m.Groups...)
+		mmap.Deps = append(mmap.Deps, m.Deps...)
+		mmap.Rels = append(mmap.Rels, m.Rels...)
+	}
+	return mmap
+}
+
+func Map(filename string) Micromap {
+	file, err := ioutil.ReadFile(filename)
 	if err != nil {
 		panic(err)
 	}
