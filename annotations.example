@@ -2,22 +2,13 @@
 	//config:
 	//  app: MyApp
 	//groups:
-	//  - name: group1
+	//  - name: DataCenter
 	//    deps:
 	//      - name: Postgres
 	//        typ: db
 	//        rels:
 	//          - path: Orders
- asdfasdf
- 
-	//@micromap
-	//groups:
-	//  - name: group1
-	//    deps:
-	//      - name: Postgres
-	//        typ: db
-	//        rels:
-	//          - path: Orders2
+	//          - path: Products
 	//  - name: AWS
 	//    deps:
 	//      - name: SNS
@@ -30,4 +21,8 @@
 	//deps:
 	//  - name: Postgres2
 	//    typ: db
-	//    parent: group1
+	//    parent: DataCenter
+	//rels:
+  //  - path: OutOfStock
+	//    dir: back
+	//    service: SQS

@@ -1,7 +1,4 @@
-graph merged {
-rankdir=LR
-
-subgraph {
+graph {
 rankdir=LR
 "MyApp"[shape=circle,fontcolor=white,style=filled,fillcolor="#a99cbc"]
 "Postgres"[shape=cylinder,fontcolor=white,style=filled,fillcolor="#79da8e"]
@@ -20,6 +17,4 @@ subgraph cluster_1{
 label="AWS";
 SNS;SQS;
 }
-}
-
 }

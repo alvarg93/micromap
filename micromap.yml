@@ -1,27 +1,29 @@
 config:
   app: MyApp
 groups:
-- name: group1
-- name: group1
+- name: DataCenter
 - name: AWS
 deps:
 - name: Postgres
   typ: db
-  parent: group1
-- name: Postgres
-  typ: db
-  parent: group1
+  parent: DataCenter
 - name: SNS
   typ: queue
   parent: AWS
 - name: SQS
   typ: queue
   parent: AWS
+- name: Postgres2
+  typ: db
+  parent: DataCenter
 rels:
 - service: Postgres
   path: Orders
 - service: Postgres
-  path: Orders2
+  path: Products
 - service: SNS
   path: NotifyUser
   dir: forward
+- service: SQS
+  path: OutOfStock
+  dir: back

@@ -2,24 +2,42 @@ package dot
 
 import (
 	"fmt"
+	"github.com/alvarg93/micromap/pkg/http"
 	"github.com/alvarg93/micromap/pkg/opts"
 	"io"
+	"os"
 )
 
-func Merge(writer io.Writer, sources []opts.GraphSource) (int, error) {
+func Merge(writer io.Writer, sources []opts.GraphSource) ([]string, error) {
 	var content string
 	content += "graph merged {\n"
 	content += "rankdir=LR\n"
 	content += "define(graph,subgraph)\n"
 
+	tempFiles := []string{}
 	for i, src := range sources {
-		fmt.Println(i, src)
+		var path string
+		fmt.Println("including:", src.Path)
 		if !src.IsURL {
-			content += fmt.Sprintf("include(%s)\n", src.Path)
+			path = src.Path
+		} else {
+			path := fmt.Sprintf("_micromap_temp_%d.dot", i)
+			f, err := os.Create(path)
+			if err != nil {
+				return tempFiles, err
+			}
+			err = http.Download(f, src.Path)
+			if err != nil {
+				return tempFiles, err
+			}
+			tempFiles = append(tempFiles, path)
 		}
+		content += fmt.Sprintf("include(%s)\n", path)
 	}
 
 	content += "}\n"
 
-	return writer.Write([]byte(content))
+	_, err := writer.Write([]byte(content))
+
+	return tempFiles, err
 }

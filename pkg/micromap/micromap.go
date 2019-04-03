@@ -118,6 +118,15 @@ func MapYaml(filename string) Micromap {
 			g.Deps = nil
 			m.Groups = append(m.Groups, g)
 		}
+		for _, d := range mmap.Deps {
+			for _, r := range d.Rels {
+				r.Service = d.Name
+				m.Rels = append(m.Rels, r)
+			}
+			d.Rels = nil
+			m.Deps = append(m.Deps, d)
+		}
+		m.Rels = append(m.Rels, mmap.Rels...)
 
 		// m.Groups = append(m.Groups, mmap.Groups...)
 		// m.Deps = append(m.Deps, mmap.Deps...)
