@@ -1,1 +1,5 @@
-micromap
+/mmap
+/mgen
+/mmerge
+
+test_result.dot

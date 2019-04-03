@@ -4,6 +4,7 @@ import (
 	"github.com/alvarg93/micromap/pkg/opts"
 	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 	"regexp"
 )
@@ -11,7 +12,11 @@ import (
 //FindFiles scans the current directory for files matching
 //opts.Regex and continues recursively if opts.Recursive is true.
 func FindFiles(opts opts.Options) ([]string, error) {
-	files, err := findInDir(".", opts.Regex, opts.Recursive)
+	wd, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+	files, err := findInDir(wd, opts.Regex, opts.Recursive)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +42,7 @@ func findInDir(path string, regex string, recursive bool) ([]string, error) {
 			p := filepath.Join(path, f.Name())
 			subdir, err := findInDir(p, regex, recursive)
 			if err != nil {
-				log.Println("failed to read from")
+				log.Println("failed to read from", f.Name(), err)
 			}
 			result = append(result, subdir...)
 		}

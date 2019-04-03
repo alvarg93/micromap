@@ -1,68 +1,33 @@
-// CONFIG
-
-@micromap.config{
-	"app":"Cart"
-}
-
-// GROUPS
-
-@micromap.group{
-	"name":"SystemA"
-}
-@micromap.group{
-	"name":"SystemB"
-}
-
-// DEPENDENCIES
-
-@micromap.dep{
-	"name":"Users",
-	"typ":"rest",
-	"parent":"SystemA"
-}
-@micromap.dep{
-	"name":"Orders",
-	"typ":"rest",
-	"parent":"SystemA"
-}
-@micromap.dep{
-	"name":"Products",
-	"typ":"rest",
-	"parent":"SystemB"
-}
-@micromap.dep{
-	"name":"SNS",
-	"typ":"queue"
-}
-@micromap.dep{
-	"name":"Postgres",
-	"typ":"db"
-}
-
-// RELATIONS
-
-@micromap.rel{
-	"path":"GET /api/v1/products",
-	"service":"Products",
-	"dir":"forward"
-}
-@micromap.rel{
-	"path":"GET /api/v1/prices",
-	"service":"Products",
-	"dir":"forward"
-}
-@micromap.rel{
-	"path":"GET /api/v2/users",
-	"service":"Users",
-	"dir":"forward"
-}
-@micromap.rel{
-	"path":"GET /api/v1/orders",
-	"service":"Orders",
-	"dir":"forward"
-}
-@micromap.rel{
-	"path":"MessageSyncInventory",
-	"service":"SNS",
-	"dir":"both"
-}
+	//@micromap
+	//config:
+	//  app: MyApp
+	//groups:
+	//  - name: group1
+	//    deps:
+	//      - name: Postgres
+	//        typ: db
+	//        rels:
+	//          - path: Orders
+ asdfasdf
+ 
+	//@micromap
+	//groups:
+	//  - name: group1
+	//    deps:
+	//      - name: Postgres
+	//        typ: db
+	//        rels:
+	//          - path: Orders2
+	//  - name: AWS
+	//    deps:
+	//      - name: SNS
+	//        typ: queue
+	//        rels:
+	//          - path: NotifyUser
+	//            dir: forward
+	//      - name: SQS
+	//        typ: queue
+	//deps:
+	//  - name: Postgres2
+	//    typ: db
+	//    parent: group1

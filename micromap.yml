@@ -1,0 +1,27 @@
+config:
+  app: MyApp
+groups:
+- name: group1
+- name: group1
+- name: AWS
+deps:
+- name: Postgres
+  typ: db
+  parent: group1
+- name: Postgres
+  typ: db
+  parent: group1
+- name: SNS
+  typ: queue
+  parent: AWS
+- name: SQS
+  typ: queue
+  parent: AWS
+rels:
+- service: Postgres
+  path: Orders
+- service: Postgres
+  path: Orders2
+- service: SNS
+  path: NotifyUser
+  dir: forward
