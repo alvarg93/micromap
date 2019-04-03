@@ -3,7 +3,7 @@ package dot
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/alvarg93/micromap/pkg/micromap"
+	"github.com/lukaszjanyga/micromap/pkg/micromap"
 	"io"
 	"math/rand"
 )

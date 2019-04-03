@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/alvarg93/micromap/pkg/dot"
-	"github.com/alvarg93/micromap/pkg/micromap"
-	"github.com/alvarg93/micromap/pkg/opts"
+	"github.com/lukaszjanyga/micromap/pkg/dot"
+	"github.com/lukaszjanyga/micromap/pkg/micromap"
+	"github.com/lukaszjanyga/micromap/pkg/opts"
 	"log"
 	"math/rand"
 	"os"

@@ -1,7 +1,7 @@
 package files
 
 import (
-	"github.com/alvarg93/micromap/pkg/opts"
+	"github.com/lukaszjanyga/micromap/pkg/opts"
 	"io/ioutil"
 	"log"
 	"os"

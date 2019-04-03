@@ -1,7 +1,7 @@
 package yaml
 
 import (
-	"github.com/alvarg93/micromap/pkg/micromap"
+	"github.com/lukaszjanyga/micromap/pkg/micromap"
 	"gopkg.in/yaml.v2"
 	"os"
 )

@@ -2,8 +2,8 @@ package dot
 
 import (
 	"fmt"
-	"github.com/alvarg93/micromap/pkg/http"
-	"github.com/alvarg93/micromap/pkg/opts"
+	"github.com/lukaszjanyga/micromap/pkg/http"
+	"github.com/lukaszjanyga/micromap/pkg/opts"
 	"io"
 	"os"
 )

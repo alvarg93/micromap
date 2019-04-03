@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/alvarg93/micromap/pkg/dot"
-	"github.com/alvarg93/micromap/pkg/m4"
-	"github.com/alvarg93/micromap/pkg/opts"
+	"github.com/lukaszjanyga/micromap/pkg/dot"
+	"github.com/lukaszjanyga/micromap/pkg/m4"
+	"github.com/lukaszjanyga/micromap/pkg/opts"
 	"log"
 	"os"
 )

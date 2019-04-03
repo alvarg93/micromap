@@ -1,7 +1,7 @@
 package opts_test
 
 import (
-	"github.com/alvarg93/micromap/pkg/opts"
+	"github.com/lukaszjanyga/micromap/pkg/opts"
 	"testing"
 )
 
