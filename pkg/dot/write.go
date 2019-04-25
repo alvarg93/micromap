@@ -1,15 +1,21 @@
 package dot
 
 import (
-	"encoding/hex"
 	"fmt"
+	"github.com/lukaszjanyga/micromap/pkg/color"
 	"github.com/lukaszjanyga/micromap/pkg/micromap"
 	"io"
-	"math/rand"
 )
 
-const nodeTemplate = `"%s"[shape=%s,fontcolor=white,style=filled,fillcolor="%s"]`
-const edgeTemplate = `"%s" -- "%s"[dir=%s,label="%s"];`
+const rankdir = "rankdir=LR"
+const graphDefaults = `graph [splines="spline"];`
+const nodeDefaults = `node [margin=0.15, fontcolor=white, style="filled,rounded", fontname = "sans-serif"];` + "\n"
+const edgeDefaults = `edge [constraint=true, fontname = "sans-serif"];`
+const nodeTemplate = `"%s"[shape=%s, fillcolor="%s", color="%s"]`
+const edgeTemplate = `"%s" -- "%s"[dir=%s, label="%s"];`
+
+const s = 0.4
+const v = 0.8
 
 //Write writes the contents of a Micromap into a file.
 func Write(f io.Writer, mmap micromap.Micromap) error {
@@ -17,18 +23,18 @@ func Write(f io.Writer, mmap micromap.Micromap) error {
 
 	content += beginGraph()
 	if mmap.Config != nil {
-		content += node(*mmap.Config.App, getColorHash(), "")
+		content += node(*mmap.Config.App, "", color.RandomHSV(s, v))
 	}
 
 	grpDeps := make(map[string][]string)
 
 	for _, grp := range mmap.Groups {
 		for _, dep := range grp.Deps {
-			content += node(dep.Name, getColorHash(), dep.Typ)
+			content += node(dep.Name, dep.Typ, color.RandomHSV(s, v))
 		}
 	}
 	for _, dep := range mmap.Deps {
-		content += node(dep.Name, getColorHash(), dep.Typ)
+		content += node(dep.Name, dep.Typ, color.RandomHSV(s, v))
 		if dep.Parent != "" {
 			grpDeps[dep.Parent] = append(grpDeps[dep.Parent], dep.Name)
 		}
@@ -53,10 +59,10 @@ func Write(f io.Writer, mmap micromap.Micromap) error {
 	for i, grp := range mmap.Groups {
 		content += beginGroup(i, grp.Name)
 		for _, dep := range grpDeps[grp.Name] {
-			content += dep + ";"
+			content += `"` + dep + `";`
 		}
 		for _, dep := range grp.Deps {
-			content += dep.Name + ";"
+			content += `"` + dep.Name + `";`
 		}
 		content += endGroup()
 	}
@@ -68,7 +74,10 @@ func Write(f io.Writer, mmap micromap.Micromap) error {
 
 func beginGraph() string {
 	content := "graph {\n"
-	content += "rankdir=LR\n"
+	content += rankdir + "\n"
+	content += graphDefaults + "\n"
+	content += nodeDefaults + "\n"
+	content += edgeDefaults + "\n"
 	return content
 }
 
@@ -93,18 +102,17 @@ func edge(a, b, label, dir string) string {
 	return fmt.Sprintf(edgeTemplate, a, b, dir, label) + "\n"
 }
 
-func node(name, color, typ string) string {
-	shape := "circle"
+func node(name, typ string, color color.HSV) string {
+	shape := "box"
 	switch typ {
 	case "db":
 		shape = "cylinder"
 	case "queue":
 		shape = "box3d"
+	case "lib":
+		shape = "tab"
 	}
-	return fmt.Sprintf(nodeTemplate, name, shape, color) + "\n"
-}
-
-func getColorHash() string {
-	r, g, b := uint8(rand.Uint32()%127+100), uint8(rand.Uint32()%127+100), uint8(rand.Uint32()%127+100)
-	return "#" + hex.EncodeToString([]byte{byte(r), byte(g), byte(b)})
+	borderColor := color
+	borderColor.V += 0.1
+	return fmt.Sprintf(nodeTemplate, name, shape, color.ToRGB().ToColorHash(), borderColor.ToRGB().ToColorHash()) + "\n"
 }

@@ -1,5 +1,5 @@
 config:
-  app: MyApp
+  app: Product Service
 groups:
 - name: DataCenter
 - name: AWS
@@ -24,6 +24,9 @@ rels:
 - service: SNS
   path: NotifyUser
   dir: forward
-- service: SQS
+- service: SNS
   path: OutOfStock
+  dir: back
+- service: SQS
+  path: JobsTypeA
   dir: back

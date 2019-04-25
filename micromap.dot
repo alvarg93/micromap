@@ -1,20 +1,25 @@
 graph {
 rankdir=LR
-"MyApp"[shape=circle,fontcolor=white,style=filled,fillcolor="#a99cbc"]
-"Postgres"[shape=cylinder,fontcolor=white,style=filled,fillcolor="#79da8e"]
-"SNS"[shape=box3d,fontcolor=white,style=filled,fillcolor="#b99ec3"]
-"SQS"[shape=box3d,fontcolor=white,style=filled,fillcolor="#76c2b8"]
-"Postgres2"[shape=cylinder,fontcolor=white,style=filled,fillcolor="#95a0b8"]
-"MyApp" -- "Postgres"[dir=none,label="Orders"];
-"MyApp" -- "Postgres"[dir=none,label="Products"];
-"MyApp" -- "SNS"[dir=forward,label="NotifyUser"];
-"MyApp" -- "SQS"[dir=back,label="OutOfStock"];
+graph [splines="spline"];
+node [margin=0.15, fontcolor=white, style="filled,rounded", fontname = "sans-serif"];
+
+edge [constraint=true, fontname = "sans-serif"];
+"Product Service"[shape=box, fillcolor="#7accbb", color="#89e5d3"]
+"Postgres"[shape=cylinder, fillcolor="#7accb8", color="#89e5d0"]
+"SNS"[shape=box3d, fillcolor="#7acc96", color="#89e5a9"]
+"SQS"[shape=box3d, fillcolor="#cc7a8a", color="#e5899c"]
+"Postgres2"[shape=cylinder, fillcolor="#b77acc", color="#ce89e5"]
+"Product Service" -- "Postgres"[dir=none, label="Orders"];
+"Product Service" -- "Postgres"[dir=none, label="Products"];
+"Product Service" -- "SNS"[dir=forward, label="NotifyUser"];
+"Product Service" -- "SNS"[dir=back, label="OutOfStock"];
+"Product Service" -- "SQS"[dir=back, label="JobsTypeA"];
 subgraph cluster_0{
 label="DataCenter";
-Postgres;Postgres2;
+"Postgres";"Postgres2";
 }
 subgraph cluster_1{
 label="AWS";
-SNS;SQS;
+"SNS";"SQS";
 }
 }
