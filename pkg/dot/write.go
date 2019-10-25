@@ -8,11 +8,11 @@ import (
 )
 
 const rankdir = "rankdir=LR"
-const graphDefaults = `graph [splines="spline"];`
-const nodeDefaults = `node [margin=0.15, fontcolor=white, style="filled,rounded", fontname = "sans-serif"];` + "\n"
+const graphDefaults = `graph [splines="line", ranksep="2", nodesep="1"];` //throws errors on merges, when graphs become subgraphs
+const nodeDefaults = `node [margin=0.25, fontcolor=white, style="filled,rounded", fontname = "sans-serif"];` + "\n"
 const edgeDefaults = `edge [constraint=true, fontname = "sans-serif"];`
 const nodeTemplate = `"%s"[shape=%s, fillcolor="%s", color="%s"]`
-const edgeTemplate = `"%s" -- "%s"[dir=%s, label="%s"];`
+const edgeTemplate = `"%s" -- "%s"[dir=%s, headlabel="%s"];`
 
 const s = 0.4
 const v = 0.8
@@ -22,49 +22,53 @@ func Write(f io.Writer, mmap micromap.Micromap) error {
 	var content string
 
 	content += beginGraph()
-	if mmap.Config != nil {
-		content += node(*mmap.Config.App, "", color.RandomHSV(s, v))
-	}
+	subgraphs := 0
 
-	grpDeps := make(map[string][]string)
+	for name, app := range mmap.Apps {
+		fmt.Println(app)
+		content += node(name, "", color.RandomHSV(s, v))
 
-	for _, grp := range mmap.Groups {
-		for _, dep := range grp.Deps {
-			content += node(dep.Name, dep.Typ, color.RandomHSV(s, v))
-		}
-	}
-	for _, dep := range mmap.Deps {
-		content += node(dep.Name, dep.Typ, color.RandomHSV(s, v))
-		if dep.Parent != "" {
-			grpDeps[dep.Parent] = append(grpDeps[dep.Parent], dep.Name)
-		}
-	}
+		grpDeps := make(map[string][]string)
 
-	for _, grp := range mmap.Groups {
-		for _, dep := range grp.Deps {
-			for _, rel := range dep.Rels {
-				content += edge(*mmap.Config.App, dep.Name, rel.Path, rel.Dir)
+		for _, grp := range app.Groups {
+			for _, dep := range grp.Deps {
+				content += node(dep.Name, dep.Typ, color.RandomHSV(s, v))
 			}
 		}
-	}
-	for _, dep := range mmap.Deps {
-		for _, rel := range dep.Rels {
-			content += edge(*mmap.Config.App, dep.Name, rel.Path, rel.Dir)
+		for _, dep := range app.Deps {
+			content += node(dep.Name, dep.Typ, color.RandomHSV(s, v))
+			if dep.Parent != "" {
+				grpDeps[dep.Parent] = append(grpDeps[dep.Parent], dep.Name)
+			}
 		}
-	}
-	for _, rel := range mmap.Rels {
-		content += edge(*mmap.Config.App, rel.Service, rel.Path, rel.Dir)
-	}
 
-	for i, grp := range mmap.Groups {
-		content += beginGroup(i, grp.Name)
-		for _, dep := range grpDeps[grp.Name] {
-			content += `"` + dep + `";`
+		for _, grp := range app.Groups {
+			for _, dep := range grp.Deps {
+				for _, rel := range dep.Rels {
+					content += edge(name, dep.Name, rel.Name, rel.Dir)
+				}
+			}
 		}
-		for _, dep := range grp.Deps {
-			content += `"` + dep.Name + `";`
+		for _, dep := range app.Deps {
+			for _, rel := range dep.Rels {
+				content += edge(name, dep.Name, rel.Name, rel.Dir)
+			}
 		}
-		content += endGroup()
+		for _, rel := range app.Rels {
+			content += edge(name, rel.Service, rel.Name, rel.Dir)
+		}
+
+		for i, grp := range app.Groups {
+			content += beginGroup(subgraphs+i, grp.Name)
+			for _, dep := range grpDeps[grp.Name] {
+				content += `"` + dep + `";`
+			}
+			for _, dep := range grp.Deps {
+				content += `"` + dep.Name + `";`
+			}
+			content += endGroup()
+		}
+		subgraphs += len(app.Groups)
 	}
 	content += endGraph()
 
@@ -75,7 +79,7 @@ func Write(f io.Writer, mmap micromap.Micromap) error {
 func beginGraph() string {
 	content := "graph {\n"
 	content += rankdir + "\n"
-	content += graphDefaults + "\n"
+	// content += graphDefaults + "\n" //throws errors on merges, when graphs become subgraphs
 	content += nodeDefaults + "\n"
 	content += edgeDefaults + "\n"
 	return content

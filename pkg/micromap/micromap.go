@@ -3,6 +3,7 @@ package micromap
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
@@ -12,15 +13,15 @@ import (
 
 //Micromap contains the result of parsing @micromap annotations
 type Micromap struct {
-	Config *Configuration `yaml:"config,omitempty"`
-	Groups []Group        `yaml:"groups,omitempty"`
-	Deps   []Dependency   `yaml:"deps,omitempty"`
-	Rels   []Relation     `yaml:"rels,omitempty"`
+	Apps map[string]App `yaml:"apps"`
 }
 
-//Configuration represents the @micromap.config annotation
-type Configuration struct {
-	App *string `yaml:"app,omitempty"`
+//Config represents the @micromap.config annotation
+type App struct {
+	// Name   string       `yaml:"name,omitempty"`
+	Groups []Group      `yaml:"groups,omitempty"`
+	Deps   []Dependency `yaml:"dependencies,omitempty"`
+	Rels   []Relation   `yaml:"relations,omitempty"`
 }
 
 //Dependency represents the @micromap.dep annotation
@@ -28,20 +29,21 @@ type Dependency struct {
 	Name   string     `yaml:"name,omitempty"`
 	Typ    string     `yaml:"typ,omitempty"`
 	Parent string     `yaml:"parent,omitempty"`
-	Rels   []Relation `yaml:"rels,omitempty"`
+	Rels   []Relation `yaml:"relations,omitempty"`
 }
 
 //Relation represents the @micromap.rel annotation
 type Relation struct {
+	Name    string `yaml:"name,omitempty"`
 	Service string `yaml:"service,omitempty"`
-	Path    string `yaml:"path,omitempty"`
+	Owner   string `yaml:"owner,omitempty"`
 	Dir     string `yaml:"dir,omitempty"`
 }
 
 //Group represents the @micromap.group annotation
 type Group struct {
 	Name string       `yaml:"name,omitempty"`
-	Deps []Dependency `yaml:"deps,omitempty"`
+	Deps []Dependency `yaml:"dependencies,omitempty"`
 }
 
 func FromYaml(yml io.Reader) Micromap {
@@ -52,24 +54,24 @@ func FromYaml(yml io.Reader) Micromap {
 		content = append(content, byte('\n'))
 	}
 	m := Micromap{}
-	yaml.Unmarshal(content, &m)
+	err := yaml.Unmarshal(content, &m)
+	if err != nil {
+		fmt.Println(err)
+	}
 	return m
 }
 
 //MapMany creates a Micromap containing values from
 //all provided filenames.
 func MapManyYaml(filenames []string) Micromap {
-	var mmap Micromap
+	var m Micromap
 	for _, file := range filenames {
-		m := MapYaml(file)
-		if m.Config != nil {
-			mmap.Config = m.Config
+		mmap := MapYaml(file)
+		for key, val := range mmap.Apps {
+			m.Apps[key] = val
 		}
-		mmap.Groups = append(mmap.Groups, m.Groups...)
-		mmap.Deps = append(mmap.Deps, m.Deps...)
-		mmap.Rels = append(mmap.Rels, m.Rels...)
 	}
-	return mmap
+	return m
 }
 
 //Map creates a Micromap containing values from
@@ -90,9 +92,7 @@ func MapYaml(filename string) Micromap {
 	for _, find := range finds {
 		var err error
 		result := trimInlineComments(find)[1:]
-		mmap := Micromap{
-			Config: &Configuration{},
-		}
+		mmap := Micromap{}
 		if len(result) >= 9 && string(result[:9]) == "@micromap" {
 			results := bytes.SplitN(result, []byte{'\n'}, 2)
 			err = yaml.Unmarshal(results[1], &mmap)
@@ -102,35 +102,31 @@ func MapYaml(filename string) Micromap {
 				continue
 			}
 		}
-		if mmap.Config != nil && mmap.Config.App != nil {
-			m.Config = mmap.Config
-		}
-		for _, g := range mmap.Groups {
-			for _, d := range g.Deps {
-				for _, r := range d.Rels {
-					r.Service = d.Name
-					m.Rels = append(m.Rels, r)
-				}
-				d.Rels = nil
-				d.Parent = g.Name
-				m.Deps = append(m.Deps, d)
-			}
-			g.Deps = nil
-			m.Groups = append(m.Groups, g)
-		}
-		for _, d := range mmap.Deps {
-			for _, r := range d.Rels {
-				r.Service = d.Name
-				m.Rels = append(m.Rels, r)
-			}
-			d.Rels = nil
-			m.Deps = append(m.Deps, d)
-		}
-		m.Rels = append(m.Rels, mmap.Rels...)
 
-		// m.Groups = append(m.Groups, mmap.Groups...)
-		// m.Deps = append(m.Deps, mmap.Deps...)
+		// for _, a := range mmap.Apps {
+		// for _, g := range a.Groups {
+		// 	for _, d := range g.Deps {
+		// 		for _, r := range d.Rels {
+		// 			r.Service = d.Name
+		// 			m.Rels = append(m.Rels, r)
+		// 		}
+		// 		d.Rels = nil
+		// 		d.Parent = g.Name
+		// 		m.Deps = append(m.Deps, d)
+		// 	}
+		// 	g.Deps = nil
+		// 	m.Groups = append(m.Groups, g)
+		// }
+		// for _, d := range mmap.Deps {
+		// 	for _, r := range d.Rels {
+		// 		r.Service = d.Name
+		// 		m.Rels = append(m.Rels, r)
+		// 	}
+		// 	d.Rels = nil
+		// 	m.Deps = append(m.Deps, d)
+		// }
 		// m.Rels = append(m.Rels, mmap.Rels...)
+		// }
 	}
 	return m
 }
