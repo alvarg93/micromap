@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"github.com/lukaszjanyga/micromap/pkg/dot"
 	"github.com/lukaszjanyga/micromap/pkg/micromap"
-	"github.com/lukaszjanyga/micromap/pkg/opts"
+	"github.com/lukaszjanyga/micromap/pkg/options"
+	"github.com/lukaszjanyga/micromap/pkg/png"
 	"math/rand"
 	"os"
 	"time"
 )
 
 func main() {
-	opts, help := opts.ParseArgs(os.Args)
+	opts, help := options.ParseArgs(os.Args)
 	if help {
 		os.Exit(0)
 	}
@@ -23,8 +24,15 @@ func main() {
 		defer yml.Close()
 	}
 	if err != nil {
+		fmt.Println(err.Error())
+		return
 	}
-	mmap := micromap.FromYaml(yml)
+
+	mmap, err := micromap.FromYaml(yml)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 
 	f, err := os.Create(opts.DotFile)
 	if f != nil {
@@ -32,17 +40,17 @@ func main() {
 	}
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
+		return
 	}
 
-	err = dot.Write(f, mmap)
+	err = dot.Dot{Micromap: &mmap}.Write(f)
 	if err != nil {
-		fmt.Println("failed to write dot file", err)
-		os.Exit(1)
+		fmt.Println("failed to write dot file", err.Error())
+		return
 	}
-	err = dot.ToPng(opts.DotFile, opts.ImgFile, opts.ImgFormat)
+	err = png.ToPng(opts.DotFile, opts.ImgFile, opts.ImgFormat)
 	if err != nil {
-		fmt.Println("failed to write dot file", err)
-		os.Exit(1)
+		fmt.Println("failed to write dot file", err.Error())
+		return
 	}
 }

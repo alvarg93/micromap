@@ -1,4 +1,4 @@
-package dot
+package png
 
 import (
 	"os/exec"
